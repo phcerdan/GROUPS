@@ -16,17 +16,20 @@ include(${SlicerExecutionModel_USE_FILE})
 #set(ITK_NO_IO_FACTORY_REGISTER_MANAGER 1) # See Libs/ITKFactoryRegistration/CMakeLists.txt
 #include(${ITK_USE_FILE})
 
+message(STATUS "**** CLAPACK_AT_MODULE :${CLAPACK_INCLUDE_DIRS}")
 #-----------------------------------------------------------------------------
 set(MODULE_INCLUDE_DIRECTORIES
+  ${CLAPACK_INCLUDE_DIRS}
   )
 
 set(MODULE_SRCS
   GroupwiseRegistration.cpp
   )
 
+message(STATUS "********* CLAPACK_LIBRARIES: ${CLAPACK_LIBRARIES}")
 set(MODULE_TARGET_LIBRARIES
 #  ${ITK_LIBRARIES}
-  ${LAPACK_LIBRARIES}
+  ${CLAPACK_LIBRARIES}
   Mesh
   ${VTK_LIBRARIES}
   )

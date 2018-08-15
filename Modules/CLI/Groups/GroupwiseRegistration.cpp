@@ -15,7 +15,6 @@
 #include <float.h>
 #include "GroupwiseRegistration.h"
 #include "SphericalHarmonics.h"
-#include <lapacke.h>
 #include "newuoa.h"
 
 #include <vtkPolyData.h>
@@ -25,6 +24,20 @@
 #include <vtkSmartPointer.h>
 #include <vtkPointData.h>
 #include <vtkPointLocator.h>
+
+extern "C" {
+#include "f2c.h"
+#include "clapack.h"
+/* int sgels_(char *trans, integer *m, integer *n, integer * */
+/*            nrhs, real *a, integer *lda, real *b, integer *ldb, real *work, integer *lwork, integer *info); */
+
+/* void LAPACK_ssyev( char* jobz, char* uplo, lapack_int* n, float* a, */
+/*                    lapack_int* lda, float* w, float* work, lapack_int* lwork, */
+/*                    lapack_int *info ); */
+/* void ssyev_(char *jobz, char *uplo, integer *n, real *M, */
+/* 	integer *lda, real *eig, real *m_work, integer *lwork, */
+/* 	integer *info); */
+}
 
 GroupwiseRegistration::GroupwiseRegistration(void)
 {
@@ -613,10 +626,12 @@ void GroupwiseRegistration::initProperties(int subj, const char **property, int 
 	// find the best statistics across subjects
 	for (int i = 0; i < m_nProperties + m_nSurfaceProperties; i++)
 	{
+		auto &stats_max = Statistics::max;
+		auto &stats_min = Statistics::min;
 		cout << "--Property " << i << endl;
 		m_spharm[subj].meanProperty[i] = Statistics::mean(&m_spharm[subj].property[nVertex * i], nVertex);
-		m_spharm[subj].maxProperty[i] = Statistics::max(&m_spharm[subj].property[nVertex * i], nVertex);
-		m_spharm[subj].minProperty[i] = Statistics::min(&m_spharm[subj].property[nVertex * i], nVertex);
+		m_spharm[subj].maxProperty[i] = stats_max(&m_spharm[subj].property[nVertex * i], nVertex);
+		m_spharm[subj].minProperty[i] = stats_min(&m_spharm[subj].property[nVertex * i], nVertex);
 		m_spharm[subj].sdevProperty[i] = sqrt(Statistics::var(&m_spharm[subj].property[nVertex * i], nVertex));
 		cout << "---Min/Max: " << m_spharm[subj].minProperty[i] << ", " << m_spharm[subj].maxProperty[i] << endl;
 		cout << "---Mean/Stdev: " << m_spharm[subj].meanProperty[i] << ", " << m_spharm[subj].sdevProperty[i] << endl;
@@ -706,10 +721,13 @@ void GroupwiseRegistration::initPropertiesAndLandmarks(int subj, string surfacen
 	for( ; it != it_end ; it ++ )
 	// for (int i = 0; i < propertyNames.size(); i++)
 	{
+
+		auto &stats_max = Statistics::max;
+		auto &stats_min = Statistics::min;
 		cout << "--Property " << it->first << endl;
 		m_spharm[subj].meanProperty[i] = Statistics::mean(&m_spharm[subj].property[nVertex * i], nVertex);
-		m_spharm[subj].maxProperty[i] = Statistics::max(&m_spharm[subj].property[nVertex * i], nVertex);
-		m_spharm[subj].minProperty[i] = Statistics::min(&m_spharm[subj].property[nVertex * i], nVertex);
+		m_spharm[subj].maxProperty[i] = stats_max(&m_spharm[subj].property[nVertex * i], nVertex);
+		m_spharm[subj].minProperty[i] = stats_min(&m_spharm[subj].property[nVertex * i], nVertex);
 		m_spharm[subj].sdevProperty[i] = sqrt(Statistics::var(&m_spharm[subj].property[nVertex * i], nVertex));
 		cout << "---Min/Max: " << m_spharm[subj].minProperty[i] << ", " << m_spharm[subj].maxProperty[i] << endl;
 		cout << "---Mean/Stdev: " << m_spharm[subj].meanProperty[i] << ", " << m_spharm[subj].sdevProperty[i] << endl;
@@ -1136,10 +1154,10 @@ float GroupwiseRegistration::entropy(void)
 
 void GroupwiseRegistration::eigenvalues(float *M, int dim, float *eig)
 {
-	int n = dim;
-	int lwork = dim * 3 - 1;	// dimension of the work array
-	int lda = n;			// lda: leading dimension
-	int info;				// information (0 for successful exit)
+	long int n = dim;
+	long int lwork = dim * 3 - 1;	// dimension of the work array
+	long int lda = n;			// lda: leading dimension
+	long int info;				// information (0 for successful exit)
 	
 	char jobz[] = "N";	// eigenvalue only
 	char uplo[] = "L"; // Lower triangle

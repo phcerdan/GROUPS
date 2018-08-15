@@ -40,10 +40,11 @@ if(${EXTENSION_NAME}_SUPERBUILD)
 endif()
 
 #-----------------------------------------------------------------------------
-find_package(BLAS REQUIRED)
-find_package(LAPACKE REQUIRED)
-find_package(LAPACK REQUIRED)
-include_directories(${LAPACKE_INCLUDE_DIRS})
+find_package(CLAPACK REQUIRED)
+include_directories(${CLAPACK_INCLUDE_DIRS})
+message(STATUS ">>>> CLAPACK_DIR: ${CLAPACK_DIR}")
+message(STATUS ">>>> CLAPACK_LIBRARIES: ${CLAPACK_LIBRARIES}")
+message(STATUS ">>>> CLAPACK_INCLUDE: ${CLAPACK_INCLUDE_DIRS}")
 
 find_package(MeshLib REQUIRED)
 
@@ -54,7 +55,7 @@ add_subdirectory(Modules)
 
 #-----------------------------------------------------------------------------
 set(EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS)
-list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${LAPACK_DIR};LAPACK;RuntimeLibraries;/")
+list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${CLAPACK_DIR};CLAPACK;RuntimeLibraries;/")
 list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${MeshLib_DIR};MeshLib;RuntimeLibraries;/")
 list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${RigidAlignment_DIR};RigidAlignment;RuntimeLibraries;/")
 list(APPEND EXTENSION_CPACK_INSTALL_CMAKE_PROJECTS "${SurfRemesh_DIR};SurfRemesh;RuntimeLibraries;/")

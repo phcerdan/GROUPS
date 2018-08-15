@@ -1,5 +1,5 @@
-
-set(proj LAPACK)
+set(proj CLAPACK)
+set(CLAPACK_version 3.2.1)
 
 # Set dependency list
 set(${proj}_DEPENDS
@@ -10,32 +10,26 @@ set(${proj}_DEPENDS
 ExternalProject_Include_Dependencies(${proj} PROJECT_VAR proj)
 
 if(${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
-  unset(LAPACK_DIR CACHE)
-  find_package(LAPACK REQUIRED)
-  unset(LAPACKE_DIR CACHE)
-  find_package(LAPACKE REQUIRED)
+  unset(CLAPACK_DIR CACHE)
+  find_package(CLAPACK REQUIRED)
 endif()
 
 # Sanity checks
-if(DEFINED LAPACK_DIR AND NOT EXISTS ${LAPACK_DIR})
-  message(FATAL_ERROR "LAPACK_DIR [${LAPACK_DIR}] variable is defined but corresponds to nonexistent directory")
-endif()
-if(DEFINED LAPACKE_DIR AND NOT EXISTS ${LAPACKE_DIR})
-  message(FATAL_ERROR "LAPACKE_DIR [${LAPACKE_DIR}] variable is defined but corresponds to nonexistent directory")
+if(DEFINED CLAPACK_DIR AND NOT EXISTS ${CLAPACK_DIR})
+  message(FATAL_ERROR "CLAPACK_DIR [${CLAPACK_DIR}] variable is defined but corresponds to nonexistent directory")
 endif()
 
-if(NOT DEFINED LAPACK_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_LAPACK
-   AND NOT DEFINED LAPACKE_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_LAPACKE)
+if(NOT DEFINED CLAPACK_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_CLAPACK)
 
   ExternalProject_SetIfNotDefined(
     ${CMAKE_PROJECT_NAME}_${proj}_GIT_REPOSITORY
-    "${EP_GIT_PROTOCOL}://github.com/Reference-LAPACK/lapack.git"
+    "${EP_GIT_PROTOCOL}://github.com/phcerdan/CLAPACK.git"
     QUIET
     )
 
   ExternalProject_SetIfNotDefined(
     ${CMAKE_PROJECT_NAME}_${proj}_GIT_TAG
-    "97bc1b834b517c03e9eaf8b9fc6f79f26c16b320"
+    "3529c199b404bce8ea6761f449e14921ce941fb9"
     QUIET
     )
 
@@ -62,23 +56,20 @@ if(NOT DEFINED LAPACK_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_LAPACK
       -DCMAKE_LIBRARY_OUTPUT_DIRECTORY:PATH=${CMAKE_BINARY_DIR}/${Slicer_THIRDPARTY_LIB_DIR}
       -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
       # Install directories
-      -DLAPACK_INSTALL_RUNTIME_DIR:STRING=${Slicer_INSTALL_THIRDPARTY_LIB_DIR}
-      -DLAPACK_INSTALL_LIBRARY_DIR:STRING=${Slicer_INSTALL_THIRDPARTY_LIB_DIR}
+      -DCLAPACK_INSTALL_RUNTIME_DIR:STRING=${Slicer_INSTALL_THIRDPARTY_LIB_DIR}
+      -DCLAPACK_INSTALL_LIBRARY_DIR:STRING=${Slicer_INSTALL_THIRDPARTY_LIB_DIR}
       # Options
+      -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON # -fPIC
       -DBUILD_EXAMPLES:BOOL=OFF
       -DBUILD_TESTING:BOOL=OFF
-      -DCBLAS:BOOL=OFF
-      -DLAPACKE:BOOL=ON
     INSTALL_COMMAND ""
     DEPENDS
       ${${proj}_DEPENDS}
     )
-  set(LAPACK_DIR ${EP_BINARY_DIR})
-  set(LAPACKE_DIR ${EP_BINARY_DIR})
+  set(CLAPACK_DIR ${EP_BINARY_DIR})
 
 else()
   ExternalProject_Add_Empty(${proj} DEPENDS ${${proj}_DEPENDS})
 endif()
 
-mark_as_superbuild(LAPACK_DIR:PATH)
-mark_as_superbuild(LAPACKE_DIR:PATH)
+mark_as_superbuild(CLAPACK_DIR:PATH)
