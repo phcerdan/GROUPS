@@ -15,7 +15,6 @@
 #include <float.h>
 #include "GroupwiseRegistration.h"
 #include "SphericalHarmonics.h"
-#include <lapacke.h>
 #include "newuoa.h"
 
 #include <vtkPolyData.h>
@@ -25,6 +24,20 @@
 #include <vtkSmartPointer.h>
 #include <vtkPointData.h>
 #include <vtkPointLocator.h>
+
+extern "C" {
+#include "f2c.h"
+#include "clapack.h"
+int sgels_(char *trans, integer *m, integer *n, integer *
+           nrhs, real *a, integer *lda, real *b, integer *ldb, real *work, integer *lwork, integer *info);
+
+/* void LAPACK_ssyev( char* jobz, char* uplo, lapack_int* n, float* a, */
+/*                    lapack_int* lda, float* w, float* work, lapack_int* lwork, */
+/*                    lapack_int *info ); */
+ssyev_(char *jobz, char *uplo, integer *n, real *M,
+	integer *lda, real *eig, real *m_work, integer *lwork,
+	integer *info)
+}
 
 GroupwiseRegistration::GroupwiseRegistration(void)
 {

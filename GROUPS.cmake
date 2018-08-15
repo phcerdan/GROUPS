@@ -1,13 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
-#enable_language(Fortran)
 
-find_package(BLAS REQUIRED)
-
-find_package(LAPACKE )
-find_package(LAPACK REQUIRED)
+find_package(CLAPACK )
+find_package(CLAPACK REQUIRED)
 
 
-include_directories(${LAPACKE_INCLUDE_DIRS})
+include_directories(${CLAPACK_INCLUDE_DIRS})
 
 find_package(MeshLib REQUIRED)
 
